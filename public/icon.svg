@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f2fe" />
+      <stop offset="100%" stop-color="#4facfe" />
+    </linearGradient>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#141e30" />
+      <stop offset="100%" stop-color="#0a0f1d" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad)" />
+  <circle cx="256" cy="256" r="180" fill="none" stroke="url(#grad)" stroke-width="24" stroke-dasharray="850" stroke-dashoffset="150" stroke-linecap="round" />
+  <line x1="256" y1="120" x2="256" y2="250" stroke="url(#grad)" stroke-width="28" stroke-linecap="round" />
+  <!-- Coffee steam elements -->
+  <path d="M 210 90 Q 220 70 210 50" fill="none" stroke="#00f2fe" stroke-width="12" stroke-linecap="round" opacity="0.7"/>
+  <path d="M 256 80 Q 266 60 256 40" fill="none" stroke="#00f2fe" stroke-width="12" stroke-linecap="round" opacity="0.9"/>
+  <path d="M 302 90 Q 312 70 302 50" fill="none" stroke="#00f2fe" stroke-width="12" stroke-linecap="round" opacity="0.7"/>
+</svg>

@@ -1,0 +1,23 @@
+{
+  "name": "controlpc",
+  "version": "1.0.0",
+  "description": "Control remoto y Anti-Sleep para macOS desde el navegador móvil",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "caffeinate",
+    "anti-sleep",
+    "remote-control",
+    "macos",
+    "mobile-web"
+  ],
+  "author": "Alejandro",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.21.2",
+    "qrcode": "^1.5.4"
+  }
+}

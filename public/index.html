@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0d1117">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Control Mac">
+  <title>Control Mac & Anti-Sleep</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/svg+xml" href="/icon.svg">
+  <link rel="apple-touch-icon" href="/icon.svg">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="app-container">
+
+    <!-- HEADER SUPERIOR -->
+    <header class="header">
+      <div class="brand">
+        <div class="logo-icon">☕</div>
+        <div class="brand-text">
+          <h1>Mac Remote</h1>
+          <span class="status-pill connected" id="connectionBadge">
+            <span class="pulse-dot"></span> <span id="connectionText">Conectado</span>
+          </span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" id="btnShowQr" title="Ver Código QR" aria-label="Código QR">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- TARJETA PRINCIPAL: ANTI-SLEEP / CAFFEINATE -->
+    <section class="card hero-card" id="antiSleepCard">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="card-icon">⚡</span>
+          <div>
+            <h2>Anti-Suspensión</h2>
+            <p class="subtitle">Evita que tu Mac se apague o entre en reposo</p>
+          </div>
+        </div>
+        <div class="hero-status-tag" id="antiSleepStatusTag">Inactivo</div>
+      </div>
+
+      <!-- BOTÓN PRINCIPAL ON / OFF -->
+      <div class="hero-action-container">
+        <button class="big-power-toggle" id="btnToggleAntiSleep">
+          <div class="power-glow"></div>
+          <div class="power-icon">
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+              <line x1="12" y1="2" x2="12" y2="12"></line>
+            </svg>
+          </div>
+          <span class="power-label" id="btnAntiSleepLabel">ACTIVAR</span>
+        </button>
+      </div>
+
+      <!-- CUENTA REGRESIVA DINÁMICA -->
+      <div class="countdown-box" id="countdownBox" style="display: none;">
+        <span class="countdown-label">Tiempo Restante:</span>
+        <div class="countdown-digits" id="countdownDigits">00:00:00</div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="countdownProgress"></div>
+        </div>
+      </div>
+
+      <!-- SELECTOR DE TIEMPO -->
+      <div class="timer-section">
+        <label class="section-label">Duración:</label>
+        <div class="timer-chips" id="timerChips">
+          <button class="chip active" data-seconds="0">Infinito ∞</button>
+          <button class="chip" data-seconds="900">15m</button>
+          <button class="chip" data-seconds="1800">30m</button>
+          <button class="chip" data-seconds="3600">1h</button>
+          <button class="chip" data-seconds="7200">2h</button>
+          <button class="chip" data-seconds="14400">4h</button>
+          <button class="chip" data-custom="true">Otro...</button>
+        </div>
+      </div>
+
+      <!-- MODO DE PANTALLA -->
+      <div class="display-mode-selector">
+        <label class="section-label">Modo de Pantalla:</label>
+        <div class="toggle-group">
+          <button class="toggle-opt active" id="optDisplayOn" data-keep-display="true">
+            <span class="opt-icon">🖥️</span> Pantalla Encendida
+          </button>
+          <button class="toggle-opt" id="optDisplayOff" data-keep-display="false">
+            <span class="opt-icon">🌙</span> Solo Procesador
+          </button>
+        </div>
+        <p class="opt-hint" id="displayModeHint">Mantiene la pantalla despierta sin apagarse.</p>
+      </div>
+    </section>
+
+    <!-- ESTADO DEL SISTEMA / HARDWARE -->
+    <section class="card stats-grid-card">
+      <div class="stats-row">
+        <!-- BATERÍA -->
+        <div class="stat-pill" id="statBattery">
+          <div class="stat-icon">🔋</div>
+          <div class="stat-details">
+            <div class="stat-num" id="batteryPercent">--%</div>
+            <div class="stat-sub" id="batteryStatus">Cargando</div>
+          </div>
+        </div>
+
+        <!-- CPU -->
+        <div class="stat-pill" id="statCpu">
+          <div class="stat-icon">⚡</div>
+          <div class="stat-details">
+            <div class="stat-num" id="cpuPercent">--%</div>
+            <div class="stat-sub">Uso CPU</div>
+          </div>
+        </div>
+
+        <!-- RAM -->
+        <div class="stat-pill" id="statRam">
+          <div class="stat-icon">🧠</div>
+          <div class="stat-details">
+            <div class="stat-num" id="ramPercent">--%</div>
+            <div class="stat-sub" id="ramUsage">-- / -- GB</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="device-meta">
+        <span class="meta-item"><span class="meta-icon">💻</span> <span id="metaHostname">Mac</span></span>
+        <span class="meta-item"><span class="meta-icon">⏱️</span> Encendido: <span id="metaUptime">--</span></span>
+      </div>
+    </section>
+
+    <!-- CONTROL DE AUDIO Y MULTIMEDIA -->
+    <section class="card">
+      <div class="card-title">
+        <span class="card-icon">🔊</span>
+        <h2>Volumen y Medios</h2>
+      </div>
+
+      <div class="volume-container">
+        <div class="volume-slider-row">
+          <button class="icon-btn" id="btnMuteToggle" title="Silenciar">
+            <svg id="iconVolumeHigh" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            </svg>
+            <svg id="iconVolumeMuted" class="hidden" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <line x1="23" y1="9" x2="17" y2="15"></line>
+              <line x1="17" y1="9" x2="23" y2="15"></line>
+            </svg>
+          </button>
+          <input type="range" min="0" max="100" value="50" class="range-slider" id="volumeSlider">
+          <span class="volume-value" id="volumeValue">50%</span>
+        </div>
+
+        <div class="volume-quick-steps">
+          <button class="btn-step" id="btnVolDown">-10%</button>
+          <button class="btn-step" id="btnVol30">30%</button>
+          <button class="btn-step" id="btnVol60">60%</button>
+          <button class="btn-step" id="btnVol100">100%</button>
+          <button class="btn-step" id="btnVolUp">+10%</button>
+        </div>
+
+        <div class="media-controls">
+          <button class="media-btn" id="btnMediaPrev" title="Anterior">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="19 20 9 12 19 4 19 20"></polygon>
+              <line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="3"></line>
+            </svg>
+          </button>
+          <button class="media-btn media-btn-play" id="btnMediaPlayPause" title="Play/Pause">
+            <svg id="iconPlay" width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+          </button>
+          <button class="media-btn" id="btnMediaNext" title="Siguiente">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 4 15 12 5 20 5 4"></polygon>
+              <line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="3"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ENERGÍA Y PANTALLA -->
+    <section class="card">
+      <div class="card-title">
+        <span class="card-icon">🔒</span>
+        <h2>Energía y Pantalla</h2>
+      </div>
+      <div class="action-grid">
+        <button class="action-btn" id="btnLockScreen">
+          <div class="action-icon">🔒</div>
+          <div class="action-title">Bloquear</div>
+          <div class="action-desc">Bloquear pantalla</div>
+        </button>
+
+        <button class="action-btn" id="btnSleepDisplay">
+          <div class="action-icon">🖥️</div>
+          <div class="action-title">Apagar Pantalla</div>
+          <div class="action-desc">Ahorra energía</div>
+        </button>
+
+        <button class="action-btn" id="btnJiggle">
+          <div class="action-icon">🖱️</div>
+          <div class="action-title">Despertar</div>
+          <div class="action-desc">Simular actividad</div>
+        </button>
+
+        <button class="action-btn warning" id="btnSleepMac">
+          <div class="action-icon">💤</div>
+          <div class="action-title">Suspender</div>
+          <div class="action-desc">Poner Mac a dormir</div>
+        </button>
+
+        <button class="action-btn danger" id="btnRestartMac">
+          <div class="action-icon">🔄</div>
+          <div class="action-title">Reiniciar</div>
+          <div class="action-desc">Reiniciar Mac</div>
+        </button>
+
+        <button class="action-btn danger" id="btnShutdownMac">
+          <div class="action-icon">🛑</div>
+          <div class="action-title">Apagar</div>
+          <div class="action-desc">Apagar equipo</div>
+        </button>
+      </div>
+    </section>
+
+    <!-- VISTA REMOTA (SCREENSHOT) -->
+    <section class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="card-icon">📸</span>
+          <h2>Vista de Pantalla</h2>
+        </div>
+        <button class="btn-sm" id="btnRefreshScreenshot">Actualizar</button>
+      </div>
+      <div class="screenshot-box" id="screenshotBox">
+        <div class="screenshot-placeholder" id="screenshotPlaceholder">
+          <span>Toca "Actualizar" para ver la pantalla del Mac</span>
+        </div>
+        <img id="screenshotImg" class="screenshot-img hidden" alt="Captura de Pantalla">
+      </div>
+      <p class="screenshot-time" id="screenshotTime"></p>
+    </section>
+
+    <!-- HERRAMIENTAS RÁPIDAS (PORTAPAPELES, URL, NOTIFICACIÓN) -->
+    <section class="card">
+      <div class="card-title">
+        <span class="card-icon">🚀</span>
+        <h2>Herramientas Rápidas</h2>
+      </div>
+
+      <!-- PORTAPAPELES -->
+      <div class="tool-group">
+        <label class="tool-label">📋 Enviar texto al portapapeles del Mac:</label>
+        <div class="input-with-button">
+          <input type="text" id="clipboardInput" placeholder="Escribe o pega texto..." class="text-input">
+          <button class="btn-accent" id="btnSendClipboard">Copiar</button>
+        </div>
+      </div>
+
+      <!-- ABRIR LINK -->
+      <div class="tool-group">
+        <label class="tool-label">🌐 Abrir enlace en el navegador del Mac:</label>
+        <div class="input-with-button">
+          <input type="url" id="urlInput" placeholder="https://ejemplo.com" class="text-input">
+          <button class="btn-accent" id="btnOpenUrl">Abrir</button>
+        </div>
+      </div>
+
+      <!-- NOTIFICACIÓN -->
+      <div class="tool-group">
+        <label class="tool-label">🔔 Enviar aviso sonoro a la pantalla:</label>
+        <div class="input-with-button">
+          <input type="text" id="notifyInput" placeholder="¡Mensaje en pantalla!" class="text-input">
+          <button class="btn-accent" id="btnSendNotify">Enviar</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <p>Mac Remote Controller • Conectado vía WiFi local</p>
+      <p class="ip-info" id="ipFooter">IP: cargando...</p>
+    </footer>
+
+  </div>
+
+  <!-- MODAL DE CÓDIGO QR -->
+  <div class="modal-overlay hidden" id="qrModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Escanear desde otro Celular</h3>
+        <button class="close-btn" id="btnCloseQr">&times;</button>
+      </div>
+      <div class="modal-body qr-body">
+        <div class="qr-wrapper">
+          <img id="qrImage" alt="Código QR de Conexión">
+        </div>
+        <p class="qr-url" id="qrUrlText"></p>
+        <p class="qr-hint">Ambos dispositivos deben estar conectados a la misma red WiFi.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE CONFIRMACIÓN DE SEGURIDAD -->
+  <div class="modal-overlay hidden" id="confirmModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="confirmTitle">Confirmar Acción</h3>
+        <button class="close-btn" id="btnCancelConfirm">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="confirmMessage">¿Estás seguro de continuar?</p>
+        <div class="modal-actions">
+          <button class="btn-secondary" id="btnCancelModal">Cancelar</button>
+          <button class="btn-danger" id="btnExecuteModal">Confirmar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICACIONES -->
+  <div class="toast hidden" id="toast"></div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
